@@ -291,6 +291,32 @@ class ParanoiaTest < test_framework
     assert model.instance_variable_get(:@destroy_callback_called)
   end
 
+  def test_destroy_on_really_destroyed_model
+    model = ParanoidModel.create!
+    model.really_destroy!
+    assert model.really_destroyed?
+    assert model.paranoia_destroyed?
+    model.destroy
+    assert model.really_destroyed?
+    assert model.paranoia_destroyed?
+  end
+
+  def test_destroy_on_unsaved_model
+    # Just to demonstrate the AR behaviour
+    model = NonParanoidModel.new
+    model.destroy!
+    assert model.really_destroyed?
+    model.destroy!
+    assert model.really_destroyed?
+
+    # Mirrors behaviour above
+    model = ParanoidModel.new
+    model.destroy!
+    assert model.paranoia_destroyed?
+    model.destroy!
+    assert model.paranoia_destroyed?
+  end
+
   def test_restore
     model = ParanoidModel.new
     model.save
